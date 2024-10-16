@@ -1,0 +1,76 @@
+<!-- res/layout/activity_home.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/md_theme_light_background"
+    tools:context=".view.Home">
+
+    <TextView
+        android:id="@+id/tvWelcome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome, User"
+        android:textSize="24sp"
+        android:textColor="@color/md_theme_light_primary"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/tvEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Email: "
+        android:textSize="18sp"
+        android:textColor="@color/md_theme_light_onBackground"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvMobile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mobile: "
+        android:textSize="18sp"
+        android:textColor="@color/md_theme_light_onBackground"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvDOB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DOB: "
+        android:textSize="18sp"
+        android:textColor="@color/md_theme_light_onBackground"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvWeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Weight: "
+        android:textSize="18sp"
+        android:textColor="@color/md_theme_light_onBackground"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvHeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Height: "
+        android:textSize="18sp"
+        android:textColor="@color/md_theme_light_onBackground"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvMedicalCondition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Medical Condition: "
+        android:textSize="18sp"
+        android:textColor="@color/md_theme_light_onBackground"
+        android:layout_marginBottom="8dp" />
+
+</LinearLayout>
