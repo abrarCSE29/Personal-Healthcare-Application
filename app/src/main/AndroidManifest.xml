@@ -21,6 +21,7 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".view.SignUp"/>
         <activity android:name=".view.Home"/>
+        <activity android:name=".view.AppointmentsActivity" />
     </application>
 
 </manifest>

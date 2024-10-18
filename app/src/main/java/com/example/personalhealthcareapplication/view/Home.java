@@ -85,7 +85,10 @@ public class Home extends AppCompatActivity {
         } else if (itemId == R.id.nav_profile) {
             Toast.makeText(this, "Profile selected", Toast.LENGTH_SHORT).show();
             drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (itemId == R.id.nav_logout) {
+        } else if (itemId == R.id.nav_appointments) {  // New menu item for Appointments
+            openAppointmentsPage();
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }else if (itemId == R.id.nav_logout) {
             logoutUser();
         } else {
             Toast.makeText(this, "Unknown item selected", Toast.LENGTH_SHORT).show();
@@ -140,5 +143,9 @@ public class Home extends AppCompatActivity {
     private void logoutUser() {
         mAuth.signOut();
         navigateToLogin();
+    }
+    private void openAppointmentsPage() {
+        Intent intent = new Intent(Home.this, AppointmentsActivity.class);
+        startActivity(intent);
     }
 }

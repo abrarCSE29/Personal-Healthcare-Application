@@ -11,6 +11,14 @@
         android:title="Profile"
         android:icon="@drawable/ic_profile" />
     <item
+        android:id="@+id/nav_appointments"
+        android:title="Doctor Appointments"
+        android:icon="@drawable/ic_doctor_appointment" />
+    <item
+        android:id="@+id/nav_medicine_reminder"
+        android:title="Medicine Reminder"
+        android:icon="@drawable/ic_medication" />
+    <item
         android:id="@+id/nav_logout"
         android:title="Log Out"
         android:icon="@drawable/ic_logout" />
