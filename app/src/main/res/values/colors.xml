@@ -23,4 +23,7 @@
     <color name="md_theme_light_onError">#FFFFFF</color>
     <color name="md_theme_light_errorContainer">#F9DEDC</color>
     <color name="md_theme_light_onErrorContainer">#410E0B</color>
+
+    <color name="orange">#fca503</color>
+    <color name="red">#fc0303</color>
 </resources>

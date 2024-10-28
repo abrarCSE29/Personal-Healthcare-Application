@@ -14,9 +14,13 @@ import java.util.List;
 public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.AppointmentViewHolder> {
 
     private List<Appointment> appointments;
+    private OnEditClickListener onEditClickListener;
+    private OnDeleteClickListener onDeleteClickListener;
 
-    public AppointmentAdapter(List<Appointment> appointments) {
+    public AppointmentAdapter(List<Appointment> appointments, OnEditClickListener editClickListener, OnDeleteClickListener deleteClickListener) {
         this.appointments = appointments;
+        this.onEditClickListener = editClickListener;
+        this.onDeleteClickListener = deleteClickListener;
     }
 
     @NonNull
@@ -33,6 +37,19 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
         holder.tvDoctorName.setText(appointment.getDoctorName());
         holder.tvAppointmentDate.setText("Date: " + appointment.getDate());
         holder.tvAppointmentTime.setText("Time: " + appointment.getTime());
+
+        // Set edit and delete click listeners
+        holder.itemView.findViewById(R.id.btnEdit).setOnClickListener(v -> {
+            if (onEditClickListener != null) {
+                onEditClickListener.onEditClick(appointment);
+            }
+        });
+
+        holder.itemView.findViewById(R.id.btnDelete).setOnClickListener(v -> {
+            if (onDeleteClickListener != null) {
+                onDeleteClickListener.onDeleteClick(appointment);
+            }
+        });
     }
 
     @Override
@@ -41,7 +58,6 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
     }
 
     static class AppointmentViewHolder extends RecyclerView.ViewHolder {
-
         TextView tvDoctorName, tvAppointmentDate, tvAppointmentTime;
 
         public AppointmentViewHolder(@NonNull View itemView) {
@@ -50,5 +66,14 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
             tvAppointmentDate = itemView.findViewById(R.id.tvAppointmentDate);
             tvAppointmentTime = itemView.findViewById(R.id.tvAppointmentTime);
         }
+    }
+
+    // Interfaces for edit and delete actions
+    public interface OnEditClickListener {
+        void onEditClick(Appointment appointment);
+    }
+
+    public interface OnDeleteClickListener {
+        void onDeleteClick(Appointment appointment);
     }
 }

@@ -53,7 +53,7 @@ public class Home extends AppCompatActivity {
 
         // Load default fragment (Home or Appointments)
         if (savedInstanceState == null) {
-            loadFragment(new AppointmentFragment()); // Load AppointmentFragment by default
+            loadFragment(new HomeFragment()); // Load HomeFragment by default
             navigationView.setCheckedItem(R.id.nav_home);
         }
 
@@ -69,15 +69,17 @@ public class Home extends AppCompatActivity {
     private boolean handleNavigationItemSelected(@NonNull MenuItem item) {
         Fragment selectedFragment = null;
         if (item.getItemId() == R.id.nav_home) {
-            Toast.makeText(this, "Home Selected", Toast.LENGTH_SHORT).show();
+            selectedFragment = new HomeFragment();
         } else if (item.getItemId() == R.id.nav_profile) {
-            Toast.makeText(this, "Profile Selected", Toast.LENGTH_SHORT).show();
+            selectedFragment = new ProfileFragment();
         } else if (item.getItemId() == R.id.nav_logout) {
             logoutUser();
             return true;
         } else if (item.getItemId() == R.id.nav_appointment) {
             selectedFragment = new AppointmentFragment();
-        } else {
+        } else if(item.getItemId() == R.id.nav_medicine_reminder){
+            selectedFragment = new MedicineReminderFragment();
+        }else{
             Toast.makeText(this, "Unknown Option", Toast.LENGTH_SHORT).show();
         }
 

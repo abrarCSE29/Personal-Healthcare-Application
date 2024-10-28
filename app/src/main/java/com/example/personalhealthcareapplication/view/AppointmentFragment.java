@@ -1,7 +1,11 @@
 package com.example.personalhealthcareapplication.view;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -18,28 +22,24 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.personalhealthcareapplication.R;
 import com.example.personalhealthcareapplication.model.Appointment;
+import com.example.personalhealthcareapplication.notifications.NotificationReceiver;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class AppointmentFragment extends Fragment {
+public class AppointmentFragment extends Fragment implements AppointmentAdapter.OnEditClickListener, AppointmentAdapter.OnDeleteClickListener {
 
     private RecyclerView recyclerView;
     private AppointmentAdapter adapter;
     private List<Appointment> appointments;
     private FirebaseFirestore db;
     private String userId;
-
-    public AppointmentFragment() {
-        // Required empty public constructor
-    }
 
     @Nullable
     @Override
@@ -57,14 +57,14 @@ public class AppointmentFragment extends Fragment {
 
         // Set up RecyclerView adapter
         appointments = new ArrayList<>();
-        adapter = new AppointmentAdapter(appointments);
+        adapter = new AppointmentAdapter(appointments, this, this); // Pass listeners
         recyclerView.setAdapter(adapter);
 
         // Load appointments from Firestore
         loadAppointments();
 
         // Add new appointment when FAB is clicked
-        fabAddAppointment.setOnClickListener(v -> openAddAppointmentDialog());
+        fabAddAppointment.setOnClickListener(v -> openAddAppointmentDialog(null));
 
         return view;
     }
@@ -77,21 +77,19 @@ public class AppointmentFragment extends Fragment {
         appointmentsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 appointments.clear();
-                QuerySnapshot querySnapshot = task.getResult();
-                if (querySnapshot != null) {
-                    for (QueryDocumentSnapshot document : querySnapshot) {
-                        Appointment appointment = document.toObject(Appointment.class);
-                        appointments.add(appointment);
-                    }
-                    adapter.notifyDataSetChanged();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    Appointment appointment = document.toObject(Appointment.class);
+                    appointment.setId(document.getId()); // Set document ID
+                    appointments.add(appointment);
                 }
+                adapter.notifyDataSetChanged();
             } else {
                 Toast.makeText(getContext(), "Failed to load appointments", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void openAddAppointmentDialog() {
+    private void openAddAppointmentDialog(Appointment appointment) {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_appointment, null);
 
         EditText etDoctorName = dialogView.findViewById(R.id.etDoctorName);
@@ -99,6 +97,13 @@ public class AppointmentFragment extends Fragment {
         EditText etTime = dialogView.findViewById(R.id.etTime);
 
         Calendar calendar = Calendar.getInstance();
+
+        // Populate fields if editing
+        if (appointment != null) {
+            etDoctorName.setText(appointment.getDoctorName());
+            etDate.setText(appointment.getDate());
+            etTime.setText(appointment.getTime());
+        }
 
         // Set Date Picker
         etDate.setOnClickListener(v -> {
@@ -108,10 +113,7 @@ public class AppointmentFragment extends Fragment {
 
             DatePickerDialog datePickerDialog = new DatePickerDialog(
                     getContext(),
-                    (view, year1, month1, dayOfMonth) -> {
-                        String date = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
-                        etDate.setText(date);
-                    },
+                    (view, year1, month1, dayOfMonth) -> etDate.setText(dayOfMonth + "/" + (month1 + 1) + "/" + year1),
                     year, month, day);
             datePickerDialog.show();
         });
@@ -124,16 +126,22 @@ public class AppointmentFragment extends Fragment {
             TimePickerDialog timePickerDialog = new TimePickerDialog(
                     getContext(),
                     (view, hourOfDay, minute1) -> {
-                        String time = String.format("%02d:%02d", hourOfDay, minute1);
-                        etTime.setText(time);
+                        // Format to 12-hour time with AM/PM
+                        Calendar selectedTime = Calendar.getInstance();
+                        selectedTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        selectedTime.set(Calendar.MINUTE, minute1);
+
+                        String formattedTime = android.text.format.DateFormat.format("hh:mm a", selectedTime).toString();
+                        etTime.setText(formattedTime);
                     },
-                    hour, minute, true);
+                    hour, minute, false // Set the last parameter to false to use 12-hour format
+            );
             timePickerDialog.show();
         });
 
-        // Show the Add Appointment Dialog
+        // Show the Add/Edit Appointment Dialog
         new androidx.appcompat.app.AlertDialog.Builder(getContext())
-                .setTitle("Add New Appointment")
+                .setTitle(appointment == null ? "Add New Appointment" : "Edit Appointment")
                 .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
                     String doctorName = etDoctorName.getText().toString();
@@ -145,8 +153,14 @@ public class AppointmentFragment extends Fragment {
                         return;
                     }
 
-                    // Save appointment to Firestore
-                    saveAppointment(new Appointment(doctorName, date, time));
+                    if (appointment == null) {
+                        saveAppointment(new Appointment(doctorName, date, time));
+                    } else {
+                        appointment.setDoctorName(doctorName);
+                        appointment.setDate(date);
+                        appointment.setTime(time);
+                        updateAppointment(appointment);
+                    }
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -158,12 +172,89 @@ public class AppointmentFragment extends Fragment {
                 .collection("Appointments")
                 .add(appointment)
                 .addOnSuccessListener(documentReference -> {
+                    appointment.setId(documentReference.getId());
                     appointments.add(appointment);
                     adapter.notifyItemInserted(appointments.size() - 1);
                     Toast.makeText(getContext(), "Appointment added", Toast.LENGTH_SHORT).show();
+                    // Schedule notifications
+                    scheduleAppointmentReminders(appointment);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Failed to add appointment", Toast.LENGTH_SHORT).show();
                 });
     }
+
+    private void updateAppointment(Appointment appointment) {
+        db.collection("Users")
+                .document(userId)
+                .collection("Appointments")
+                .document(appointment.getId())
+                .set(appointment)
+                .addOnSuccessListener(aVoid -> {
+                    loadAppointments();
+                    Toast.makeText(getContext(), "Appointment updated", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to update appointment", Toast.LENGTH_SHORT).show());
+    }
+
+    private void deleteAppointment(Appointment appointment) {
+        db.collection("Users")
+                .document(userId)
+                .collection("Appointments")
+                .document(appointment.getId())
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    appointments.remove(appointment);
+                    adapter.notifyDataSetChanged();
+                    Toast.makeText(getContext(), "Appointment deleted", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to delete appointment", Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void onEditClick(Appointment appointment) {
+        openAddAppointmentDialog(appointment);
+    }
+
+    @Override
+    public void onDeleteClick(Appointment appointment) {
+        deleteAppointment(appointment);
+    }
+    private void scheduleAppointmentReminders(Appointment appointment) {
+        long appointmentTimeMillis = appointment.getAppointmentTimeInMillis(); // Method to get appointment time in millis
+
+        // Reminder times in milliseconds before the appointment
+        long[] reminderTimes = {
+                2 * 24 * 60 * 60 * 1000, // 2 days
+                1 * 24 * 60 * 60 * 1000, // 1 day
+                6 * 60 * 60 * 1000,      // 6 hours
+                3 * 60 * 60 * 1000,      // 3 hours
+                1 * 60 * 60 * 1000       // 1 hour
+        };
+
+        for (long reminderTime : reminderTimes) {
+            long triggerTime = appointmentTimeMillis - reminderTime;
+            if (triggerTime > System.currentTimeMillis()) {
+                setReminderAlarm(triggerTime, appointment);
+            }
+        }
+    }
+
+    private void setReminderAlarm(long triggerTime, Appointment appointment) {
+        Intent intent = new Intent(getContext(), NotificationReceiver.class);
+        intent.putExtra("doctorName", appointment.getDoctorName());
+        intent.putExtra("appointmentTime", appointment.getDate() + " " + appointment.getTime());
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                getContext(),
+                (int) triggerTime,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null) {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+        }
+    }
+
 }
