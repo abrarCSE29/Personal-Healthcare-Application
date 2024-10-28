@@ -11,7 +11,7 @@
         android:title="Profile"
         android:icon="@drawable/ic_profile" />
     <item
-        android:id="@+id/nav_appointments"
+        android:id="@+id/nav_appointment"
         android:title="Doctor Appointments"
         android:icon="@drawable/ic_doctor_appointment" />
     <item
