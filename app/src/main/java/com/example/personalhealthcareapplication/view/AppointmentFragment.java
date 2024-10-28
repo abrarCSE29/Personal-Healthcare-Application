@@ -6,8 +6,11 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +48,7 @@ public class AppointmentFragment extends Fragment implements AppointmentAdapter.
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_appointment, container, false);
-
+        requestNotificationPermission();
         recyclerView = view.findViewById(R.id.recyclerViewAppointments);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -191,8 +194,15 @@ public class AppointmentFragment extends Fragment implements AppointmentAdapter.
                 .document(appointment.getId())
                 .set(appointment)
                 .addOnSuccessListener(aVoid -> {
+                    // Cancel any existing reminders for this appointment
+                    cancelExistingReminders(appointment);
+
+                    // Reload and update appointments in RecyclerView
                     loadAppointments();
                     Toast.makeText(getContext(), "Appointment updated", Toast.LENGTH_SHORT).show();
+
+                    // Reschedule notifications with the updated time
+                    scheduleAppointmentReminders(appointment);
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to update appointment", Toast.LENGTH_SHORT).show());
     }
@@ -210,6 +220,8 @@ public class AppointmentFragment extends Fragment implements AppointmentAdapter.
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to delete appointment", Toast.LENGTH_SHORT).show());
     }
+
+
 
     @Override
     public void onEditClick(Appointment appointment) {
@@ -235,10 +247,12 @@ public class AppointmentFragment extends Fragment implements AppointmentAdapter.
         for (long reminderTime : reminderTimes) {
             long triggerTime = appointmentTimeMillis - reminderTime;
             if (triggerTime > System.currentTimeMillis()) {
+                Log.d("AppointmentFragment", "Scheduling reminder for: " + triggerTime);
                 setReminderAlarm(triggerTime, appointment);
             }
         }
     }
+
 
     private void setReminderAlarm(long triggerTime, Appointment appointment) {
         Intent intent = new Intent(getContext(), NotificationReceiver.class);
@@ -247,13 +261,35 @@ public class AppointmentFragment extends Fragment implements AppointmentAdapter.
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 getContext(),
-                (int) triggerTime,
+                (int) (appointment.getId().hashCode() + triggerTime), // Unique ID for each reminder
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
+
         AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         if (alarmManager != null) {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+        }
+    }
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (getContext().checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1001);
+            }
+        }
+    }
+    private void cancelExistingReminders(Appointment appointment) {
+        Intent intent = new Intent(getContext(), NotificationReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                getContext(),
+                appointment.getId().hashCode(), // Use unique ID based on appointment ID
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null) {
+            alarmManager.cancel(pendingIntent); // Cancel any existing alarms
         }
     }
 

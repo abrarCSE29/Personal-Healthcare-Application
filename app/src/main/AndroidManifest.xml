@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
 
 
     <application
@@ -11,6 +11,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/Theme.PersonalHealthCareApplication">
+
+        <receiver android:name=".notifications.NotificationReceiver" />
 
         <!-- SignUpActivity as the Launch Activity -->
         <activity android:name=".view.LoginActivity"
