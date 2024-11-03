@@ -8,8 +8,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -34,6 +36,9 @@ public class MedicineReminderFragment extends Fragment {
     private MedicineReminderAdapter adapter;
     private MedicineReminderViewModel viewModel;
     private List<MedicineReminder> reminders;
+    private TimeAdapter timeAdapter;
+    private RecyclerView rvReminderTimes;
+    private List<Long> reminderTimes = new ArrayList<>();
 
     @Nullable
     @Override
@@ -52,7 +57,7 @@ public class MedicineReminderFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(MedicineReminderViewModel.class);
 
         fabAddReminder.setOnClickListener(v -> openAddReminderDialog());
-
+        adapter.setOnMedicineClickListener(this::showMedicineDetailsDialog);
         loadReminders();
 
         return view;
@@ -64,11 +69,17 @@ public class MedicineReminderFragment extends Fragment {
         EditText etMedicineName = dialogView.findViewById(R.id.etMedicineName);
         EditText etQuantity = dialogView.findViewById(R.id.etQuantity);
         Spinner spnMedicineType = dialogView.findViewById(R.id.spnMedicineType);
-        EditText etTime = dialogView.findViewById(R.id.etTime);
+        Button btnAddTime = dialogView.findViewById(R.id.btnAddTime);
+        rvReminderTimes = dialogView.findViewById(R.id.rvReminderTimes);
+
+        reminderTimes.clear();
+        timeAdapter = new TimeAdapter(reminderTimes); // Custom adapter implementation needed
+        rvReminderTimes.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvReminderTimes.setAdapter(timeAdapter);
 
         Calendar calendar = Calendar.getInstance();
 
-        etTime.setOnClickListener(v -> {
+        btnAddTime.setOnClickListener(v -> {
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
             int minute = calendar.get(Calendar.MINUTE);
 
@@ -77,7 +88,9 @@ public class MedicineReminderFragment extends Fragment {
                     (view, hourOfDay, minute1) -> {
                         calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                         calendar.set(Calendar.MINUTE, minute1);
-                        etTime.setText(android.text.format.DateFormat.format("hh:mm a", calendar));
+                        long timeInMillis = calendar.getTimeInMillis();
+                        reminderTimes.add(timeInMillis);
+                        timeAdapter.notifyDataSetChanged();
                     },
                     hour,
                     minute,
@@ -93,24 +106,74 @@ public class MedicineReminderFragment extends Fragment {
                     String medicineName = etMedicineName.getText().toString();
                     String quantity = etQuantity.getText().toString();
                     String medicineType = spnMedicineType.getSelectedItem().toString();
-                    String time = etTime.getText().toString();
 
-                    if (TextUtils.isEmpty(medicineName) || TextUtils.isEmpty(quantity) || TextUtils.isEmpty(time)) {
-                        Toast.makeText(getContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
+                    if (TextUtils.isEmpty(medicineName) || TextUtils.isEmpty(quantity) || reminderTimes.isEmpty()) {
+                        Toast.makeText(getContext(), "Please fill all fields and add at least one time", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    // Set reminder time in milliseconds
-                    long reminderTimeInMillis = calendar.getTimeInMillis();
+                    for (long reminderTime : reminderTimes) {
+                        MedicineReminder reminder = new MedicineReminder(medicineName, quantity + " " + medicineType, reminderTime);
+                        viewModel.saveReminder(reminder);
+                        viewModel.scheduleMedicineReminder(getContext(), reminder);
+                    }
 
-                    MedicineReminder reminder = new MedicineReminder(medicineName, quantity + " " + medicineType, reminderTimeInMillis);
-                    viewModel.saveReminder(reminder);
-                    viewModel.scheduleMedicineReminder(getContext(), reminder);
-
-                    // Load reminders again to refresh the RecyclerView
-                    loadReminders();
+                    loadReminders(); // Refresh RecyclerView in fragment
                 })
                 .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showMedicineDetailsDialog(MedicineReminder medicine) {
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_medicine_details, null);
+
+        TextView tvMedicineDetailsName = dialogView.findViewById(R.id.tvMedicineDetailsName);
+        TextView tvMedicineDetailsQuantity = dialogView.findViewById(R.id.tvMedicineDetailsQuantity);
+        RecyclerView rvReminderTimes = dialogView.findViewById(R.id.rvMedicineReminderDetails);
+        Button btnAddReminderTime = dialogView.findViewById(R.id.btnAddReminderTime);
+
+        tvMedicineDetailsName.setText(medicine.getMedicineName());
+        tvMedicineDetailsQuantity.setText(medicine.getQuantity());
+
+        List<Long> reminderTimes = new ArrayList<>(/* Get associated times for the medicine */);
+        TimeAdapter timeAdapter = new TimeAdapter(reminderTimes);
+        rvReminderTimes.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvReminderTimes.setAdapter(timeAdapter);
+
+        btnAddReminderTime.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+            int hour = calendar.get(Calendar.HOUR_OF_DAY);
+            int minute = calendar.get(Calendar.MINUTE);
+
+            TimePickerDialog timePickerDialog = new TimePickerDialog(
+                    getContext(),
+                    (view, hourOfDay, minute1) -> {
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        calendar.set(Calendar.MINUTE, minute1);
+                        long timeInMillis = calendar.getTimeInMillis();
+                        reminderTimes.add(timeInMillis);
+                        timeAdapter.notifyDataSetChanged();
+
+                        // Save the new reminder to the database
+                        MedicineReminder newReminder = new MedicineReminder(
+                                medicine.getMedicineName(),
+                                medicine.getQuantity(),
+                                timeInMillis
+                        );
+                        viewModel.saveReminder(newReminder);
+                        viewModel.scheduleMedicineReminder(getContext(), newReminder);
+                    },
+                    hour,
+                    minute,
+                    false
+            );
+            timePickerDialog.show();
+        });
+
+        new AlertDialog.Builder(getContext())
+                .setTitle("Medicine Details")
+                .setView(dialogView)
+                .setPositiveButton("Close", null)
                 .show();
     }
 

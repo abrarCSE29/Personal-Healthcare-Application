@@ -14,6 +14,14 @@ import java.util.List;
 
 public class MedicineReminderAdapter extends RecyclerView.Adapter<MedicineReminderAdapter.ViewHolder> {
     private List<MedicineReminder> reminders;
+    private OnMedicineClickListener onMedicineClickListener;
+    public interface OnMedicineClickListener {
+        void onMedicineClick(MedicineReminder reminder);
+    }
+    public void setOnMedicineClickListener(OnMedicineClickListener listener) {
+        this.onMedicineClickListener = listener;
+    }
+
 
     public MedicineReminderAdapter(List<MedicineReminder> reminders) {
         this.reminders = reminders;
@@ -37,6 +45,12 @@ public class MedicineReminderAdapter extends RecyclerView.Adapter<MedicineRemind
         holder.tvMedicineName.setText(reminder.getMedicineName());
         holder.tvQuantity.setText(reminder.getQuantity());
         holder.tvTime.setText(reminder.getFormattedTime());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (onMedicineClickListener != null) {
+                onMedicineClickListener.onMedicineClick(reminder);
+            }
+        });
     }
 
     @Override

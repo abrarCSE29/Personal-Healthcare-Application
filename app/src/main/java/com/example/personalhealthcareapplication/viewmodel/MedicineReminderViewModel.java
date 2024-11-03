@@ -58,6 +58,8 @@ public class MedicineReminderViewModel extends AndroidViewModel {
                 .add(reminder);
     }
 
+
+
 //`    public void getReminders() {
 //        db.collection("Users")
 //                .document(userId)
