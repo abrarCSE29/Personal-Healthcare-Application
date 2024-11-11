@@ -101,20 +101,31 @@ public class UploadReportFragment extends Fragment {
             return;
         }
 
+        // Show "Reading Report" message while extracting text
+        LoadingDialogFragment loadingDialog = LoadingDialogFragment.newInstance("Reading Report...");
+        loadingDialog.show(getParentFragmentManager(), "loadingDialog");
+
         try (InputStream inputStream = getContext().getContentResolver().openInputStream(pdfUri);
              PDDocument document = PDDocument.load(inputStream)) {
             PDFTextStripper pdfStripper = new PDFTextStripper();
             String extractedText = pdfStripper.getText(document);
+            tvSummaryResult.setText(extractedText);
 
-            ollamaGenerateSummary(extractedText);
+            // Update to "Generating Report" before calling ollamaGenerateSummary
+            loadingDialog.dismiss();  // Dismiss current dialog
+            loadingDialog = LoadingDialogFragment.newInstance("Generating Report...");
+            loadingDialog.show(getParentFragmentManager(), "loadingDialog");
+
+            ollamaGenerateSummary(extractedText, loadingDialog);  // Pass loading dialog to this method
 
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getContext(), "Failed to analyze PDF", Toast.LENGTH_SHORT).show();
+            if (loadingDialog.isVisible()) loadingDialog.dismiss();  // Ensure dialog is dismissed on error
         }
     }
 
-    private void ollamaGenerateSummary(String extractedText) {
+    private void ollamaGenerateSummary(String extractedText, LoadingDialogFragment loadingDialog) {
         OllamaService service = ApiClient.getClient().create(OllamaService.class);
         SummaryRequest request = new SummaryRequest("llama3.2:1b", extractedText);
 
@@ -122,47 +133,41 @@ public class UploadReportFragment extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    new Thread(() -> {
-                        try {
-                            // Initialize Markwon for rendering markdown
-                            Markwon markwon = Markwon.create(getContext());
-                            BufferedSource source = Okio.buffer(response.body().source());
-                            StringBuilder summaryBuilder = new StringBuilder();
+                    try {
+                        Markwon markwon = Markwon.create(getContext());
+                        BufferedSource source = Okio.buffer(response.body().source());
+                        StringBuilder summaryBuilder = new StringBuilder();
 
-                            while (!source.exhausted()) {
-                                String line = source.readUtf8Line();
-                                if (line != null && !line.isEmpty()) {
-                                    JSONObject jsonObject = new JSONObject(line);
-                                    String lineResponse = jsonObject.getString("response");
+                        while (!source.exhausted()) {
+                            String line = source.readUtf8Line();
+                            if (line != null && !line.isEmpty()) {
+                                JSONObject jsonObject = new JSONObject(line);
+                                String lineResponse = jsonObject.getString("response");
 
-                                    summaryBuilder.append(lineResponse);
-
-                                    // Update the UI in real-time
-                                    getActivity().runOnUiThread(() -> {
-                                        // Render the markdown formatted text
-                                        markwon.setMarkdown(tvSummaryResult, summaryBuilder.toString());
-                                    });
-                                }
+                                summaryBuilder.append(lineResponse);
+                                markwon.setMarkdown(tvSummaryResult, summaryBuilder.toString());
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            getActivity().runOnUiThread(() -> {
-                                tvSummaryResult.setText("Failed to parse response.");
-                            });
                         }
-                    }).start();
-
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        tvSummaryResult.setText("Failed to parse response.");
+                    }
                 } else {
                     String errorBody = response.errorBody() != null ? response.errorBody().toString() : "Unknown error";
                     tvSummaryResult.setText("Failed to generate summary: " + errorBody);
                     Log.e("SummaryError", "Response code: " + response.code() + ", error: " + errorBody);
                 }
+
+                // Dismiss the loading dialog after summary generation completes
+                if (loadingDialog.isVisible()) loadingDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                if (loadingDialog.isVisible()) loadingDialog.dismiss();
                 tvSummaryResult.setText("Error: " + t.getMessage());
             }
         });
     }
+
 }

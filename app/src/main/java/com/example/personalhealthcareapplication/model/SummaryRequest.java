@@ -6,8 +6,9 @@ public class SummaryRequest {
 
     public SummaryRequest(String model, String prompt) {
         this.model = model;
-        this.prompt = "Generate a summary for the following medical report. Just write the summary of test and advise medical procedures that should be followed.";
+        this.prompt = "Generate a summary for the following medical report. It should contain a section called summary of report and another section called Advisements based on the report. Report should be within 30 lines";
         this.prompt = this.prompt+prompt;
+
     }
 
     public String getModel() {
