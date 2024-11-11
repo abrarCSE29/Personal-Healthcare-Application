@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
 import com.example.personalhealthcareapplication.model.MedicineReminder;
+import com.example.personalhealthcareapplication.model.ReminderEntry;
 import com.example.personalhealthcareapplication.notifications.MedicineNotificationReceiver;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,25 +30,28 @@ public class MedicineReminderViewModel extends AndroidViewModel {
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
-    public void scheduleMedicineReminder(Context context, MedicineReminder reminder) {
-        Intent intent = new Intent(context, MedicineNotificationReceiver.class);
-        intent.putExtra("medicineName", reminder.getMedicineName());
-        intent.putExtra("quantity", reminder.getQuantity());
+    public void scheduleMedicineReminders(Context context, MedicineReminder reminder) {
+        // Schedule alarms for each reminder entry
+        for (ReminderEntry entry : reminder.getReminders()) {
+            Intent intent = new Intent(context, MedicineNotificationReceiver.class);
+            intent.putExtra("medicineName", reminder.getMedicineName());
+            intent.putExtra("quantity", entry.getQuantity());
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                context,
-                (int) reminder.getReminderTimeInMillis(),
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        if (alarmManager != null) {
-            alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    reminder.getReminderTimeInMillis(),
-                    pendingIntent
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    (int) entry.getReminderTimeInMillis(),
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
+
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager != null) {
+                alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        entry.getReminderTimeInMillis(),
+                        pendingIntent
+                );
+            }
         }
     }
 
@@ -58,33 +62,7 @@ public class MedicineReminderViewModel extends AndroidViewModel {
                 .add(reminder);
     }
 
-
-
-//`    public void getReminders() {
-//        db.collection("Users")
-//                .document(userId)
-//                .collection("MedicineReminders")
-//                .get()
-//                .addOnSuccessListener(querySnapshot -> {
-//                    List<MedicineReminder> reminders = new ArrayList<>();
-//                    for (DocumentSnapshot document : querySnapshot) {
-//                        MedicineReminder reminder = document.toObject(MedicineReminder.class);
-//                        if (reminder != null) {
-//                            reminders.add(reminder);
-//                        }
-//                    }
-//                    listener.onRemindersLoaded(reminders);
-//                })
-//                .addOnFailureListener(e -> {
-//                    // Handle failure
-//                });
-//    }`
-
-    public interface OnRemindersLoadedListener {
-        void onRemindersLoaded(List<MedicineReminder> reminders);
-    }
     public Task<List<MedicineReminder>> getReminders() {
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         return db.collection("Users")
                 .document(userId)
                 .collection("MedicineReminders")

@@ -1,18 +1,21 @@
 package com.example.personalhealthcareapplication.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MedicineReminder {
+    private String id; // Firestore document ID
     private String medicineName;
-    private String quantity;
-    private long reminderTimeInMillis;
+    private List<ReminderEntry> reminders; // List of reminder entries
 
     // No-argument constructor required for Firestore
     public MedicineReminder() {
+        this.reminders = new ArrayList<>();
     }
 
-    public MedicineReminder(String medicineName, String quantity, long reminderTimeInMillis) {
+    public MedicineReminder(String medicineName, List<ReminderEntry> reminders) {
         this.medicineName = medicineName;
-        this.quantity = quantity;
-        this.reminderTimeInMillis = reminderTimeInMillis;
+        this.reminders = reminders != null ? reminders : new ArrayList<>(); // Ensure the list is initialized
     }
 
     public String getMedicineName() {
@@ -23,24 +26,28 @@ public class MedicineReminder {
         this.medicineName = medicineName;
     }
 
-    public String getQuantity() {
-        return quantity;
+    public List<ReminderEntry> getReminders() {
+        return reminders;
     }
 
-    public void setQuantity(String quantity) {
-        this.quantity = quantity;
+    public void setReminders(List<ReminderEntry> reminders) {
+        this.reminders = reminders;
     }
 
-    public long getReminderTimeInMillis() {
-        return reminderTimeInMillis;
+    public String getId() {
+        return id;
     }
 
-    public void setReminderTimeInMillis(long reminderTimeInMillis) {
-        this.reminderTimeInMillis = reminderTimeInMillis;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    // Optional: helper method to format time if needed
-    public String getFormattedTime() {
-        return android.text.format.DateFormat.format("hh:mm a", reminderTimeInMillis).toString();
+    @Override
+    public String toString() {
+        return "MedicineReminder{" +
+                "id='" + id + '\'' +
+                ", medicineName='" + medicineName + '\'' +
+                ", reminders=" + reminders +
+                '}';
     }
 }

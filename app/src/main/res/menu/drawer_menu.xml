@@ -19,7 +19,12 @@
         android:title="Medicine Reminder"
         android:icon="@drawable/ic_medication" />
     <item
+        android:id="@+id/nav_upload_report"
+        android:title="Medical Report Summary"
+        android:icon="@drawable/ic_summarize" />
+    <item
         android:id="@+id/nav_logout"
         android:title="Log Out"
         android:icon="@drawable/ic_logout" />
+
 </menu>

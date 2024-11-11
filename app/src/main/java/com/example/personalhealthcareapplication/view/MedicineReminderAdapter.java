@@ -4,32 +4,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.personalhealthcareapplication.R;
 import com.example.personalhealthcareapplication.model.MedicineReminder;
+import com.example.personalhealthcareapplication.model.ReminderEntry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MedicineReminderAdapter extends RecyclerView.Adapter<MedicineReminderAdapter.ViewHolder> {
-    private List<MedicineReminder> reminders;
-    private OnMedicineClickListener onMedicineClickListener;
+
+    private final List<MedicineReminder> medicineReminders;
+    private final OnMedicineClickListener listener;
+
     public interface OnMedicineClickListener {
-        void onMedicineClick(MedicineReminder reminder);
-    }
-    public void setOnMedicineClickListener(OnMedicineClickListener listener) {
-        this.onMedicineClickListener = listener;
+        void onMedicineClick(MedicineReminder medicineReminder);
     }
 
-
-    public MedicineReminderAdapter(List<MedicineReminder> reminders) {
-        this.reminders = reminders;
-    }
-
-    public void setReminders(List<MedicineReminder> newReminders) {
-        this.reminders = newReminders;
-        notifyDataSetChanged();
+    public MedicineReminderAdapter(List<MedicineReminder> medicineReminders, OnMedicineClickListener listener) {
+        this.medicineReminders = medicineReminders;
+        this.listener = listener;
     }
 
     @NonNull
@@ -41,33 +38,41 @@ public class MedicineReminderAdapter extends RecyclerView.Adapter<MedicineRemind
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        MedicineReminder reminder = reminders.get(position);
-        holder.tvMedicineName.setText(reminder.getMedicineName());
-        holder.tvQuantity.setText(reminder.getQuantity());
-        holder.tvTime.setText(reminder.getFormattedTime());
-
-        holder.itemView.setOnClickListener(v -> {
-            if (onMedicineClickListener != null) {
-                onMedicineClickListener.onMedicineClick(reminder);
-            }
-        });
+        MedicineReminder medicineReminder = medicineReminders.get(position);
+        holder.bind(medicineReminder, listener);
     }
 
     @Override
     public int getItemCount() {
-        return reminders.size();
+        return medicineReminders.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvMedicineName;
-        TextView tvQuantity;
-        TextView tvTime;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        private final TextView tvMedicineName;
+        private final TextView tvQuantity;
+        private final TextView tvTime;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvMedicineName = itemView.findViewById(R.id.tvMedicineName);
             tvQuantity = itemView.findViewById(R.id.tvQuantity);
             tvTime = itemView.findViewById(R.id.tvTime);
+        }
+
+        public void bind(MedicineReminder medicineReminder, OnMedicineClickListener listener) {
+            tvMedicineName.setText(medicineReminder.getMedicineName());
+            // Check for null reminders list
+            if (medicineReminder.getReminders() == null) {
+                // Initialize it to avoid NullPointerException
+                medicineReminder.setReminders(new ArrayList<>());
+            }
+            // Show first reminder as example; you might want to handle this differently
+            if (!medicineReminder.getReminders().isEmpty()) {
+                ReminderEntry firstReminder = medicineReminder.getReminders().get(0);
+                tvQuantity.setText(firstReminder.getQuantity());
+                tvTime.setText(firstReminder.getFormattedTime());
+            }
+            itemView.setOnClickListener(v -> listener.onMedicineClick(medicineReminder));
         }
     }
 }

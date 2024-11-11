@@ -26,4 +26,14 @@
 
     <color name="orange">#fca503</color>
     <color name="red">#fc0303</color>
+
+    <color name="primaryColor">#6200EE</color>
+
+
+    <color name="secondaryColor">#03DAC5</color>
+
+    <color name="primaryTextColor">#212121</color>
+
+
+    <color name="dividerColor">#BDBDBD</color>
 </resources>

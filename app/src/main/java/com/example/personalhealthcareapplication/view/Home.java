@@ -79,6 +79,8 @@ public class Home extends AppCompatActivity {
             selectedFragment = new AppointmentFragment();
         } else if(item.getItemId() == R.id.nav_medicine_reminder){
             selectedFragment = new MedicineReminderFragment();
+        }else if(item.getItemId() == R.id.nav_upload_report) {
+            selectedFragment = new UploadReportFragment();
         }else{
             Toast.makeText(this, "Unknown Option", Toast.LENGTH_SHORT).show();
         }
