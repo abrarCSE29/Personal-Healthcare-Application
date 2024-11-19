@@ -27,6 +27,7 @@ public class Home extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    FirebaseUser user;
     private TextView tvDrawerName, tvDrawerWelcome;
 
     @Override
@@ -58,7 +59,7 @@ public class Home extends AppCompatActivity {
         }
 
         // Fetch and display user data if logged in
-        FirebaseUser user = mAuth.getCurrentUser();
+        user = mAuth.getCurrentUser();
         if (user != null) {
             fetchUserInfo(user.getUid());
         } else {
@@ -72,6 +73,8 @@ public class Home extends AppCompatActivity {
             selectedFragment = new HomeFragment();
         } else if (item.getItemId() == R.id.nav_profile) {
             selectedFragment = new ProfileFragment();
+            Bundle args = new Bundle();
+            args.putString("uid", user.getUid());
         } else if (item.getItemId() == R.id.nav_logout) {
             logoutUser();
             return true;

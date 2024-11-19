@@ -59,11 +59,16 @@ dependencies {
     // Lifecycle components for MVVM
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
+    implementation 'org.osmdroid:osmdroid-android:6.1.15'
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
+
     implementation libs.recyclerview.v121
     implementation libs.coordinatorlayout
     implementation libs.mediarouter
     implementation libs.recyclerview
     implementation libs.firebase.storage
+    implementation libs.cardview
+    implementation libs.play.services.maps
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

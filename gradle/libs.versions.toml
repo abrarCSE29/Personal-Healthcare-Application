@@ -12,6 +12,8 @@ mediarouter = "1.7.0"
 recyclerview = "1.3.2"
 recyclerviewVersion = "1.2.1"
 firebaseStorage = "21.0.1"
+cardview = "1.0.0"
+playServicesMaps = "19.0.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -26,6 +28,8 @@ mediarouter = { group = "androidx.mediarouter", name = "mediarouter", version.re
 recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 recyclerview-v121 = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerviewVersion" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
+cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
+play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

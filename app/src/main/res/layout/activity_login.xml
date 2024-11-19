@@ -1,70 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="@color/md_theme_light_background">
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    android:background="@color/md_theme_light_background"
+    android:elevation="8dp"
+    app:cardCornerRadius="12dp"
+    android:layout_gravity="center"
+    app:cardBackgroundColor="@color/md_theme_light_surface">
 
-    <!-- Email Input -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/emailLayout"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        app:boxBackgroundColor="@color/md_theme_light_surface"
-        app:boxStrokeColor="@color/md_theme_light_primary"
-        android:hint="Email">
+        android:layout_height="563dp"
+        android:padding="16dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etEmail"
+        <!-- Title Text -->
+        <TextView
+            android:id="@+id/tvWelcome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="48dp"
+            android:text="Welcome Back"
+            android:textColor="@color/md_theme_light_primary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- Subtitle Text -->
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvWelcome"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:text="Login to your account"
+            android:textColor="@color/md_theme_light_onSurface"
+            android:textSize="16sp" />
+
+        <!-- Email Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/emailLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/md_theme_light_onSurface"
-            android:inputType="textEmailAddress" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_below="@id/tvSubtitle"
+            android:layout_marginTop="32dp"
+            android:hint="Email"
+            app:boxBackgroundColor="@color/md_theme_light_surface"
+            app:boxStrokeColor="@color/md_theme_light_primary"
+            app:startIconDrawable="@drawable/ic_email"
+            app:startIconTint="@color/md_theme_light_primary">
 
-    <!-- Password Input -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/passwordLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/emailLayout"
-        android:layout_marginTop="16dp"
-        app:boxBackgroundColor="@color/md_theme_light_surface"
-        app:boxStrokeColor="@color/md_theme_light_primary"
-        android:hint="Password">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/md_theme_light_onSurface" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPassword"
+        <!-- Password Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/emailLayout"
+            android:layout_marginTop="16dp"
+            android:hint="Password"
+            app:boxBackgroundColor="@color/md_theme_light_surface"
+            app:boxStrokeColor="@color/md_theme_light_primary"
+            app:startIconDrawable="@drawable/ic_password"
+            app:startIconTint="@color/md_theme_light_primary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/md_theme_light_onSurface" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Login Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/passwordLayout"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="@color/md_theme_light_primary"
+            android:icon="@drawable/ic_login"
+            android:text="Log In"
+            android:textAllCaps="false"
+            android:textColor="@color/md_theme_light_onPrimary" />
+
+        <!-- Sign-Up Prompt Text -->
+        <TextView
+            android:id="@+id/tvNewUserPrompt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btnLogin"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="48dp"
+            android:text="New with us? Sign up"
             android:textColor="@color/md_theme_light_onSurface"
-            android:inputType="textPassword" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:textSize="14sp" />
 
-    <!-- Login Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/passwordLayout"
-        android:layout_marginTop="24dp"
-        android:text="Log In"
-        android:textAllCaps="false"
-        android:textColor="@color/md_theme_light_onPrimary"
-        android:backgroundTint="@color/md_theme_light_primary" />
+        <!-- Sign-Up Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvNewUserPrompt"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/md_theme_light_primary"
+            android:icon="@drawable/ic_signup"
+            android:text="Sign Up"
+            android:textAllCaps="false"
+            android:textColor="@color/md_theme_light_onPrimary"
+            app:iconGravity="textStart"
+            app:iconTint="@color/md_theme_light_onPrimary" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSignUp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/passwordLayout"
-        android:layout_marginTop="98dp"
-        android:backgroundTint="@color/md_theme_light_primary"
-        android:text="Signup"
-        android:textAllCaps="false"
-        android:textColor="@color/md_theme_light_onPrimary" />
+    </RelativeLayout>
 
-
-</RelativeLayout>
+</androidx.cardview.widget.CardView>

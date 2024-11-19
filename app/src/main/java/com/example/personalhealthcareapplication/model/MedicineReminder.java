@@ -1,21 +1,21 @@
 package com.example.personalhealthcareapplication.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import kotlin.text.UStringsKt;
 
 public class MedicineReminder {
-    private String id; // Firestore document ID
+    private String id;
     private String medicineName;
-    private List<ReminderEntry> reminders; // List of reminder entries
+    private String quantity;
+    private long reminderTimeInMillis;
 
     // No-argument constructor required for Firestore
     public MedicineReminder() {
-        this.reminders = new ArrayList<>();
     }
 
-    public MedicineReminder(String medicineName, List<ReminderEntry> reminders) {
+    public MedicineReminder(String medicineName, String quantity, long reminderTimeInMillis) {
         this.medicineName = medicineName;
-        this.reminders = reminders != null ? reminders : new ArrayList<>(); // Ensure the list is initialized
+        this.quantity = quantity;
+        this.reminderTimeInMillis = reminderTimeInMillis;
     }
 
     public String getMedicineName() {
@@ -26,12 +26,25 @@ public class MedicineReminder {
         this.medicineName = medicineName;
     }
 
-    public List<ReminderEntry> getReminders() {
-        return reminders;
+    public String getQuantity() {
+        return quantity;
     }
 
-    public void setReminders(List<ReminderEntry> reminders) {
-        this.reminders = reminders;
+    public void setQuantity(String quantity) {
+        this.quantity = quantity;
+    }
+
+    public long getReminderTimeInMillis() {
+        return reminderTimeInMillis;
+    }
+
+    public void setReminderTimeInMillis(long reminderTimeInMillis) {
+        this.reminderTimeInMillis = reminderTimeInMillis;
+    }
+
+    // Optional: helper method to format time if needed
+    public String getFormattedTime() {
+        return android.text.format.DateFormat.format("hh:mm a", reminderTimeInMillis).toString();
     }
 
     public String getId() {
@@ -40,14 +53,5 @@ public class MedicineReminder {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    @Override
-    public String toString() {
-        return "MedicineReminder{" +
-                "id='" + id + '\'' +
-                ", medicineName='" + medicineName + '\'' +
-                ", reminders=" + reminders +
-                '}';
     }
 }

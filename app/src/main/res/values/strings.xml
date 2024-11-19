@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PersonalHealthCareApplication</string>
+    <string name="app_name">MediMate</string>
     <string-array name="medical_conditions">
         <item>Diabetes</item>
         <item>Hypertension</item>

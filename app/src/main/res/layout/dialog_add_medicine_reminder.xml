@@ -1,4 +1,6 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -7,9 +9,10 @@
     <EditText
         android:id="@+id/etMedicineName"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:hint="Medicine Name"
-        android:inputType="text" />
+        android:inputType="text"
+        android:minHeight="48dp" />
 
     <EditText
         android:id="@+id/etQuantity"
@@ -23,18 +26,12 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:entries="@array/medicine_types"
-        android:spinnerMode="dropdown"/>
+        android:spinnerMode="dropdown" />
 
-    <Button
-        android:id="@+id/btnAddTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add Time" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvReminderTimes"
+    <EditText
+        android:id="@+id/etTime"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="8dp" />
-
+        android:layout_height="48dp"
+        android:focusable="false"
+        android:hint="Reminder Time" />
 </LinearLayout>
