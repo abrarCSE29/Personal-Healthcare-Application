@@ -171,10 +171,8 @@ public class HomeFragment extends Fragment {
     }
 
     private void fetchNearbyHospitals(double userLatitude, double userLongitude) {
-        // Overpass API URL to fetch hospitals within 10 km of the user's current location
         String url = "https://overpass-api.de/api/interpreter?data=[out:json];node[amenity=hospital](around:5000," + userLatitude + "," + userLongitude + ");out;";
 
-        // Use OkHttp to make the API request
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url)
@@ -188,17 +186,31 @@ public class HomeFragment extends Fragment {
                     JSONObject jsonObject = new JSONObject(json);
                     JSONArray elements = jsonObject.getJSONArray("elements");
 
-                    // Parse the response and add markers for each hospital
                     for (int i = 0; i < elements.length(); i++) {
                         JSONObject element = elements.getJSONObject(i);
                         double lat = element.getDouble("lat");
                         double lon = element.getDouble("lon");
+
                         String name = element.has("tags") ? element.getJSONObject("tags").optString("name", "Unnamed Hospital") : "Unnamed Hospital";
+                        String phone = element.has("tags") ? element.getJSONObject("tags").optString("phone", "No contact info") : "No contact info";
+                        String street = element.has("tags") ? element.getJSONObject("tags").optString("addr:street", "") : "";
+                        String city = element.has("tags") ? element.getJSONObject("tags").optString("addr:city", "") : "";
+                        String postcode = element.has("tags") ? element.getJSONObject("tags").optString("addr:postcode", "") : "";
+
+                        String address = (!street.isEmpty() ? street + ", " : "") +
+                                (!city.isEmpty() ? city + ", " : "") +
+                                (!postcode.isEmpty() ? postcode : "");
+
+                        if (address.isEmpty()) {
+                            address = "No address available";
+                        }
+
+                        String markerTitle = name + "\nContact: " + phone + "\nAddress: " + address;
 
                         // Add a marker for each hospital
                         Marker hospitalMarker = new Marker(mapView);
                         hospitalMarker.setPosition(new GeoPoint(lat, lon));
-                        hospitalMarker.setTitle(name);
+                        hospitalMarker.setTitle(markerTitle);
                         mapView.getOverlays().add(hospitalMarker);
                     }
                 }
@@ -207,6 +219,7 @@ public class HomeFragment extends Fragment {
             }
         }).start();
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
