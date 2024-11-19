@@ -12,7 +12,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="563dp"
+        android:layout_height="664dp"
         android:padding="16dp">
 
         <!-- Title Text -->
@@ -95,24 +95,43 @@
             android:textColor="@color/md_theme_light_onPrimary" />
 
         <!-- Sign-Up Prompt Text -->
+
+        <!-- Sign-Up Button -->
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGoogleSignIn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btnSignUp"
+            android:layout_marginTop="-200dp"
+            android:backgroundTint="@color/md_theme_light_primary"
+            android:icon="@drawable/ic_google"
+            android:text="Sign In with Google"
+            android:textAllCaps="false"
+            android:textColor="@color/md_theme_light_onPrimary"
+            app:iconGravity="textStart"
+            app:iconTint="@color/md_theme_light_onPrimary" />
+
         <TextView
             android:id="@+id/tvNewUserPrompt"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="36dp"
             android:layout_below="@id/btnLogin"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="48dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="109dp"
+            android:layout_marginTop="163dp"
+            android:layout_marginEnd="92dp"
             android:text="New with us? Sign up"
             android:textColor="@color/md_theme_light_onSurface"
             android:textSize="14sp" />
 
-        <!-- Sign-Up Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSignUp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tvNewUserPrompt"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="20dp"
             android:backgroundTint="@color/md_theme_light_primary"
             android:icon="@drawable/ic_signup"
             android:text="Sign Up"

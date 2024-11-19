@@ -43,6 +43,7 @@
         <activity android:name=".view.SignUp"/>
         <activity android:name=".view.Home"/>
         <activity android:name=".view.ChatbotActivity"/>
+        <activity android:name=".view.ProfileUpdateActivity"/>
     </application>
 
 </manifest>

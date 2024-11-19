@@ -8,4 +8,6 @@
         <item>None</item>
     </string-array>
 
+    <string name="default_web_client_id">725786782359-lacd37o850ncl5cmmu3a2fj52j42n75t.apps.googleusercontent.com</string>
+
 </resources>
